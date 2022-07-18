@@ -1,0 +1,29 @@
+---
+# tasks file for common
+
+- name: Add usr/local/bin to root PATH
+  become: true
+  shell: 'export PATH="$PATH:/usr/local/bin"'
+
+- name: Update all packages
+  yum:
+    name: '*'
+    state: latest
+    update_only: yes  
+
+- name: Install common packages
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - wget
+      - epel-release
+    state: latest
+
+
+
+
+
+
+

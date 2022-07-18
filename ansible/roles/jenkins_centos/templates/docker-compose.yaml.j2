@@ -1,0 +1,39 @@
+version: "3.8"
+
+networks:
+  jenkins:
+    driver: bridge
+
+services:
+  jenkins_server:
+    build:
+      context: .
+    networks:
+      - jenkins
+    container_name: JenkinsServer
+    restart: always
+    environment:
+      - DOCKER_HOST={{ DOCKER_HOST }}
+      - DOCKER_CERT_PATH={{ DOCKER_CERT_PATH }}
+      - DOCKER_TLS_VERIFY= {{ DOCKER_TLS_VERIFY }}
+      - CASC_JENKINS_CONFIG={{ CASC_JENKINS_CONFIG }}
+      - JAVA_OPTS={{ JAVA_OPTS }}
+    ports:
+      - "{{ JENKINS_CONTROLLER_EXTERNAL_PORT }}:8080"
+      - "50000:50000"
+    volumes: {{ MAPPED_VOLUMES }}
+
+  socat:
+    image: alpine/socat
+    container_name: JenkinsDocker
+    privileged: true
+    restart: unless-stopped
+    networks:
+      jenkins:
+        aliases:
+          - docker
+    expose:
+      - "2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
